@@ -5,8 +5,9 @@ pool:
   name: 'ClassLibrary'  # Your self-hosted agent pool
 
 variables:
-  FEED_USERNAME: 'your-username'  # Use your Azure DevOps username or email
-  FEED_PASSWORD: 'your-PAT'  # Use your personal access token securely here
+  FEED_USERNAME: 'khanda4'  # Your Azure DevOps username
+  FEED_PASSWORD: '8IE41SBvRJLJ67hyPonLqoX5X4uZx37vN1usj2CG4DSfN3hPhfDDJQQJ99BDACAAAAAnPw96AAASAZDO1Xkt'  # Your PAT (Personal Access Token)
+
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
@@ -25,7 +26,7 @@ steps:
       command: 'restore'
       projects: '$(solution)'
       feedsToUse: 'select'
-      vstsFeed: 'newFeed'  # Ensure this is correctly pointing to 'newFeed'
+      vstsFeed: 'newFeed'  # This should match the feed name exactly
 
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
@@ -47,4 +48,4 @@ steps:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       nuGetFeedType: 'internal'
-      publishVstsFeed: 'newFeed'  # Correct feed name
+      publishVstsFeed: 'https://pkgs.dev.azure.com/khanda4/ClassLibraryProjects/_packaging/newFeed/nuget/v3/index.json'  # The URL must match your feed
