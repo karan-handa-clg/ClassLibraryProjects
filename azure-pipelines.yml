@@ -45,4 +45,4 @@ steps:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       nuGetFeedType: 'internal'
-      publishVstsFeed: 'newFeed'  # Use your Azure feed for publishing
+      publishVstsFeed: '853306c0-63d8-43f0-bfd1-3d881ae3cd00/bbe27d0c-18c7-43b0-911e-ca5c01cdeac8'
