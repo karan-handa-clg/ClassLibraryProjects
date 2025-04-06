@@ -1,33 +1,30 @@
 trigger:
-  branches:
-    include:
-      - main  # Trigger the pipeline on changes to the 'main' branch
+  - main
 
 pool:
-  name: 'ClassLibrary'  # Use your self-hosted agent pool name
+  name: 'ClassLibrary'  # Your self-hosted agent pool
 
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  nugetFeed: 'khanda4'  # Your Azure Artifacts feed name
+  nugetFeed: 'newFeed'  # New feed name
 
 steps:
-  # Install .NET SDK
   - task: UseDotNet@2
     displayName: 'Install .NET SDK'
     inputs:
       packageType: 'sdk'
-      version: '8.x'  # Ensure .NET 8.x SDK is installed
+      version: '8.0.x'  # Ensure .NET 8 is installed
 
-  # Restore dependencies
   - task: DotNetCoreCLI@2
     displayName: 'Restore Dependencies'
     inputs:
       command: 'restore'
       projects: '$(solution)'
+      feedsToUse: 'select'
+      vstsFeed: 'newFeed'  # Use newFeed in the restore step
 
-  # Build solution
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
     inputs:
@@ -35,7 +32,6 @@ steps:
       projects: '$(solution)'
       arguments: '--configuration $(buildConfiguration)'
 
-  # Pack NuGet package
   - task: DotNetCoreCLI@2
     displayName: 'Pack NuGet Package'
     inputs:
@@ -43,11 +39,10 @@ steps:
       projects: '**/*.csproj'  # Targets all projects
       arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
-  # Push the package to Azure Artifacts feed
   - task: DotNetCoreCLI@2
     displayName: 'Push to Azure Artifacts'
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       nuGetFeedType: 'internal'
-      publishVstsFeed: 'khanda4'  # Your Azure Artifacts feed name
+      publishVstsFeed: 'newFeed'  # Push to newFeed
