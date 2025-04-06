@@ -1,0 +1,56 @@
+trigger:
+  branches:
+    include:
+      - master  # Trigger pipeline on changes to master branch
+
+pool:
+  name: 'ClassLibrary'  # Use your self-hosted agent pool name
+
+steps:
+# Install .NET SDK
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+# Clean up bin/obj folders (optional)
+- task: DeleteFiles@1
+  inputs:
+    SourceFolder: $(Build.SourcesDirectory)
+    Contents: '**/bin/**, **/obj/**'
+    RemoveSourceFolder: false
+
+# Restore dependencies using NuGet
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+
+# Build the solution using MSBuild
+- task: MSBuild@1
+  inputs:
+    solution: '**/*.sln'
+    msbuildArgs: '/p:Configuration=Release'
+
+# Publish build artifacts (for packaging or deployment)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    artifactName: 'drop'
+    publishLocation: 'Container'
+
+# Create the NuGet package using NuGetCommand
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'off'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+
+# Push the NuGet package to Azure Artifacts feed
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    publishVstsFeed: 'https://pkgs.dev.azure.com/khanda4/StringLibrary-Project/_packaging/LabAgentFeed/nuget/v3/index.json'  # New feed URL
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
