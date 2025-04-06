@@ -9,3 +9,4 @@ C:\Users\karanhanda\source\repos\ClassLibraryProjects\StringLibrary\obj\Debug\ne
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\StringLibrary\obj\Debug\net8.0\refint\StringLibrary.dll
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\StringLibrary\obj\Debug\net8.0\StringLibrary.pdb
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\StringLibrary\obj\Debug\net8.0\ref\StringLibrary.dll
+C:\Users\karanhanda\source\repos\ClassLibraryProjects\StringLibrary\obj\Debug\net8.0\StringLibrary.sourcelink.json

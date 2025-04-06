@@ -16,3 +16,4 @@ C:\Users\karanhanda\source\repos\ClassLibraryProjects\ShowCase\obj\Debug\net8.0\
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\ShowCase\obj\Debug\net8.0\ShowCase.pdb
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\ShowCase\obj\Debug\net8.0\ShowCase.genruntimeconfig.cache
 C:\Users\karanhanda\source\repos\ClassLibraryProjects\ShowCase\obj\Debug\net8.0\ref\ShowCase.dll
+C:\Users\karanhanda\source\repos\ClassLibraryProjects\ShowCase\obj\Debug\net8.0\ShowCase.sourcelink.json
