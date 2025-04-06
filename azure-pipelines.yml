@@ -8,23 +8,26 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  nugetFeed: 'newFeed'  # New feed name
+  nugetFeed: 'newFeed'  # This should be the actual name of your feed in Azure Artifacts
 
 steps:
+  # Step 1: Install .NET SDK
   - task: UseDotNet@2
     displayName: 'Install .NET SDK'
     inputs:
       packageType: 'sdk'
       version: '8.0.x'  # Ensure .NET 8 is installed
 
+  # Step 2: Restore Dependencies
   - task: DotNetCoreCLI@2
     displayName: 'Restore Dependencies'
     inputs:
       command: 'restore'
       projects: '$(solution)'
       feedsToUse: 'select'
-      vstsFeed: 'newFeed'  # Use newFeed in the restore step
+      vstsFeed: 'https://pkgs.dev.azure.com/khanda4/_packaging/ClassLibrary/nuget/v3/index.json'  # Correct feed URL
 
+  # Step 3: Build Solution
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
     inputs:
@@ -32,6 +35,7 @@ steps:
       projects: '$(solution)'
       arguments: '--configuration $(buildConfiguration)'
 
+  # Step 4: Pack NuGet Package
   - task: DotNetCoreCLI@2
     displayName: 'Pack NuGet Package'
     inputs:
@@ -39,10 +43,11 @@ steps:
       projects: '**/*.csproj'  # Targets all projects
       arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
+  # Step 5: Push NuGet Package to Azure Artifacts
   - task: DotNetCoreCLI@2
     displayName: 'Push to Azure Artifacts'
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       nuGetFeedType: 'internal'
-      publishVstsFeed: 'newFeed'  # Push to newFeed
+      publishVstsFeed: 'https://pkgs.dev.azure.com/khanda4/_packaging/ClassLibrary/nuget/v3/index.json'  # Correct feed URL
