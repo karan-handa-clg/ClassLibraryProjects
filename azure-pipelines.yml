@@ -1,56 +1,46 @@
 trigger:
-  branches:
-    include:
-      - master  # Trigger pipeline on changes to master branch
+  - main
 
 pool:
-  name: 'ClassLibrary'  # Use your self-hosted agent pool name
+  name: 'ClassLibrary'  # Your self-hosted agent pool
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  nugetFeed: 'MyNuGetFeed'  # Name of your Azure Artifacts feed
 
 steps:
-# Install .NET SDK
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.x'
-    installationPath: $(Agent.ToolsDirectory)/dotnet
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '8.0.x'  # Ensure .NET 8 is installed
 
-# Clean up bin/obj folders (optional)
-- task: DeleteFiles@1
-  inputs:
-    SourceFolder: $(Build.SourcesDirectory)
-    Contents: '**/bin/**, **/obj/**'
-    RemoveSourceFolder: false
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore Dependencies'
+    inputs:
+      command: 'restore'
+      projects: '$(solution)'
 
-# Restore dependencies using NuGet
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/*.sln'
+  - task: DotNetCoreCLI@2
+    displayName: 'Build Solution'
+    inputs:
+      command: 'build'
+      projects: '$(solution)'
+      arguments: '--configuration $(buildConfiguration)'
 
-# Build the solution using MSBuild
-- task: MSBuild@1
-  inputs:
-    solution: '**/*.sln'
-    msbuildArgs: '/p:Configuration=Release'
+  - task: DotNetCoreCLI@2
+    displayName: 'Pack NuGet Package'
+    inputs:
+      command: 'pack'
+      projects: '**/*.csproj'  # Targets all projects
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
-# Publish build artifacts (for packaging or deployment)
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: $(Build.ArtifactStagingDirectory)
-    artifactName: 'drop'
-    publishLocation: 'Container'
-
-# Create the NuGet package using NuGetCommand
-- task: NuGetCommand@2
-  inputs:
-    command: 'pack'
-    packagesToPack: '**/*.csproj'
-    versioningScheme: 'off'
-    outputDir: '$(Build.ArtifactStagingDirectory)'
-
-# Push the NuGet package to Azure Artifacts feed
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
-    publishVstsFeed: 'https://pkgs.dev.azure.com/khanda4/StringLibrary-Project/_packaging/LabAgentFeed/nuget/v3/index.json'  # New feed URL
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+  - task: DotNetCoreCLI@2
+    displayName: 'Push to Azure Artifacts'
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: 'bbc508bf-acd8-48a0-a91f-f81eb65c8a3b/0400ba03-474a-4946-aa18-14bd42999775'
